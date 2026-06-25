@@ -19,6 +19,7 @@
  */
 
 #include "config.h"
+#include <stdint.h>
 
 #include "libavutil/attributes.h"
 #include "libavutil/cpu.h"
@@ -35,6 +36,19 @@ void ff_hevc_add_residual_16x16_8_rvv(uint8_t *_dst, const int16_t *coeffs,
                                        ptrdiff_t stride);
 void ff_hevc_add_residual_32x32_8_rvv(uint8_t *_dst, const int16_t *coeffs,
                                        ptrdiff_t stride);
+
+void ff_hevc_v_loop_filter_luma_8_rvv(uint8_t *pix, ptrdiff_t stride,
+                                       int beta, const int32_t *tc,
+                                       const uint8_t *no_p, const uint8_t *no_q);
+void ff_hevc_h_loop_filter_luma_8_rvv(uint8_t *pix, ptrdiff_t stride,
+                                       int beta, const int32_t *tc,
+                                       const uint8_t *no_p, const uint8_t *no_q);
+void ff_hevc_v_loop_filter_chroma_8_rvv(uint8_t *pix, ptrdiff_t stride,
+                                         const int32_t *tc, const uint8_t *no_p,
+                                         const uint8_t *no_q);
+void ff_hevc_h_loop_filter_chroma_8_rvv(uint8_t *pix, ptrdiff_t stride,
+                                         const int32_t *tc, const uint8_t *no_p,
+                                         const uint8_t *no_q);
 
 #define RVV_FNASSIGN(member, v, h, fn, ext) \
         member[1][v][h] = ff_h2656_put_pixels_##8_##ext;  \
@@ -83,6 +97,11 @@ void ff_hevc_dsp_init_riscv(HEVCDSPContext *c, const int bit_depth)
                 c->add_residual[1]             = ff_hevc_add_residual_8x8_8_rvv;
                 c->add_residual[2]             = ff_hevc_add_residual_16x16_8_rvv;
                 c->add_residual[3]             = ff_hevc_add_residual_32x32_8_rvv;
+
+                c->hevc_v_loop_filter_luma = ff_hevc_v_loop_filter_luma_8_rvv;
+                c->hevc_h_loop_filter_luma = ff_hevc_h_loop_filter_luma_8_rvv;
+                // c->hevc_v_loop_filter_chroma = ff_hevc_v_loop_filter_chroma_8_rvv;
+                c->hevc_h_loop_filter_chroma = ff_hevc_h_loop_filter_chroma_8_rvv;
                 break;
             default:
                 break;
